@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
@@ -40,3 +41,7 @@ This repository is configured for project-page deployment at:
 - The app is currently static and does not require a backend.
 - No Gemini API key is needed for this version.
 - If you rename the repository, update `repoName` in `vite.config.ts`.
+=======
+# vibe_test_2
+바이브 코딩 테스트 2
+>>>>>>> origin/main
