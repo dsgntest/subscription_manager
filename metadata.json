@@ -1,0 +1,5 @@
+{
+  "name": "Subscription Manager",
+  "description": "A simple subscription fee calculator and manager with a donut chart visualization.",
+  "requestFramePermissions": []
+}
