@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-const repoName = 'subscription-manager';
+const repoName = 'subscription_manager';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

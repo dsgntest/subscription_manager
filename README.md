@@ -21,7 +21,7 @@ Prerequisite: Node.js 20+
 
 This repository is configured for project-page deployment at:
 
-`https://username.github.io/subscription-manager/`
+`https://username.github.io/subscription_manager/`
 
 ### One-time GitHub setup
 
