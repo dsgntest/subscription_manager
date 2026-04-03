@@ -276,7 +276,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-5 pb-[42px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <main className="flex-1 overflow-y-auto px-5 pb-[120px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <section className="mb-8">
             <div>
               <div className="flex-1">
@@ -287,7 +287,7 @@ export default function App() {
                   key={totalCost}
                   initial={{scale: 0.96, opacity: 0.6}}
                   animate={{scale: 1, opacity: 1}}
-                  className="mt-0.5 text-[30px] font-black tracking-tight sm:text-[34px]"
+                  className="mt-0.5 text-[34px] font-black tracking-tight"
                   style={{color: theme.onSurface}}
                 >
                   {formatCurrency(totalCost)}
@@ -398,7 +398,7 @@ export default function App() {
 
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="truncate text-[20px] font-bold" style={{color: theme.onSurface}}>
+                                  <h3 className="truncate text-[20px] font-medium" style={{color: theme.onSurface}}>
                                     {sub.name}
                                   </h3>
                                 </div>
@@ -409,7 +409,7 @@ export default function App() {
                               <p className="text-[20px] font-black" style={{color: theme.onSurface}}>
                                 {formatCurrency(sub.price)}
                               </p>
-                              <p className="text-[16px]" style={{color: theme.onSurfaceVariant}}>
+                              <p className="text-[16px]" style={{color: theme.primary}}>
                                 연 {formatCurrency(sub.price * 12)}
                               </p>
                             </div>
@@ -419,7 +419,7 @@ export default function App() {
                               <button
                                 onClick={() => openEditSheet(sub)}
                                 className="inline-flex items-center rounded-xl p-2"
-                                style={{backgroundColor: '#F5F7EE', color: theme.onSurface}}
+                                style={{backgroundColor: theme.primaryContainer, color: theme.onPrimaryContainer}}
                                 aria-label={`${sub.name} 수정`}
                               >
                                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -597,18 +597,20 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        <div className="px-5 pb-[42px] pt-4">
-          <div className="flex justify-end">
-            <button
-              onClick={openCreateSheet}
-              className="z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
-              style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)'}}
-              aria-label="구독 추가"
-            >
-              <Plus size={28} />
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={openCreateSheet}
+          className="absolute z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
+          style={{
+            backgroundColor: theme.primary,
+            color: theme.onPrimary,
+            boxShadow: '0 16px 32px rgba(204,255,0,0.28)',
+            right: '20px',
+            bottom: '42px',
+          }}
+          aria-label="구독 추가"
+        >
+          <Plus size={28} />
+        </button>
       </div>
     </div>
   );
