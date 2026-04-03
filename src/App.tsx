@@ -315,7 +315,7 @@ export default function App() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="appearance-none rounded-full px-4 py-2 pr-9 text-sm font-semibold outline-none"
+                    className="appearance-none rounded-full px-4 py-2 pr-9 text-[14px] font-semibold outline-none"
                     style={{backgroundColor: theme.surfaceContainerHigh, color: theme.onSurface}}
                   >
                     <option value="price-desc">가격 높은순</option>
@@ -398,7 +398,7 @@ export default function App() {
 
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="truncate text-[16px] font-bold" style={{color: theme.onSurface}}>
+                                  <h3 className="truncate text-[20px] font-bold" style={{color: theme.onSurface}}>
                                     {sub.name}
                                   </h3>
                                 </div>
@@ -418,17 +418,23 @@ export default function App() {
                           <div className="mt-4 flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openEditSheet(sub)}
-                                className="inline-flex items-center rounded-xl px-2 py-2 text-[13px] font-medium"
+                                className="inline-flex items-center rounded-xl p-2"
                                 style={{backgroundColor: '#F5F7EE', color: theme.onSurface}}
+                                aria-label={`${sub.name} 수정`}
                               >
-                                수정
+                                <span className="material-symbols-rounded" aria-hidden="true">
+                                  edit
+                                </span>
                               </button>
                               <button
                                 onClick={() => handleRemove(sub.id)}
-                                className="inline-flex items-center rounded-xl px-2 py-2 text-[13px] font-medium"
+                                className="inline-flex items-center rounded-xl p-2"
                                 style={{backgroundColor: '#FFF1ED', color: '#D86041'}}
+                                aria-label={`${sub.name} 삭제`}
                               >
-                                삭제
+                                <span className="material-symbols-rounded" aria-hidden="true">
+                                  delete
+                                </span>
                               </button>
                           </div>
                         </div>
@@ -440,15 +446,6 @@ export default function App() {
             </div>
           </section>
         </main>
-
-        <button
-          onClick={openCreateSheet}
-          className="absolute bottom-7 right-6 z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
-          style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)', bottom: '42px', right: '20px'}}
-          aria-label="구독 추가"
-        >
-          <Plus size={28} />
-        </button>
 
         <AnimatePresence>
           {isSheetOpen && (
@@ -599,6 +596,19 @@ export default function App() {
             </>
           )}
         </AnimatePresence>
+
+        <div className="px-5 pb-[42px] pt-4">
+          <div className="flex justify-end">
+            <button
+              onClick={openCreateSheet}
+              className="z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
+              style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)'}}
+              aria-label="구독 추가"
+            >
+              <Plus size={28} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
