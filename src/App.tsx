@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {CalendarDays, Pencil, Plus, Sparkles, Tag, Trash2, WalletCards, X} from 'lucide-react';
+import {Plus, Sparkles, X} from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 
 type Category = '영상' | '음악' | 'AI' | '쇼핑' | '기타';
@@ -146,16 +146,6 @@ export default function App() {
 
   const yearlyCost = useMemo(() => totalCost * 12, [totalCost]);
 
-  const categorySummary = useMemo(() => {
-    return subscriptions.reduce<Record<Category, number>>(
-      (acc, sub) => {
-        acc[sub.category] += 1;
-        return acc;
-      },
-      {영상: 0, 음악: 0, AI: 0, 쇼핑: 0, 기타: 0},
-    );
-  }, [subscriptions]);
-
   const filteredSubscriptions = useMemo(() => {
     if (activeFilter === '전체') return subscriptions;
     return subscriptions.filter((sub) => sub.category === activeFilter);
@@ -255,7 +245,7 @@ export default function App() {
         className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col overflow-hidden sm:min-h-[880px] sm:rounded-[36px]"
         style={{backgroundColor: theme.surface, boxShadow: theme.shadow}}
       >
-        <header className="relative overflow-hidden px-6 pb-6 pt-12">
+        <header className="relative overflow-hidden px-5 pb-6 pt-12">
           <div
             className="absolute inset-x-0 top-0 h-32 opacity-80"
             style={{
@@ -274,10 +264,12 @@ export default function App() {
                   디지털 사글세
                 </h1>
                 <p className="mt-2 text-sm leading-6" style={{color: theme.onSurfaceSoft}}>
-                  구독료, 결제일, 카테고리를 한 화면에서 관리하고 연간 부담까지 빠르게 확인하세요.
+                  구독료, 결제일, 카테고리를 한 화면에서 관리하고
+                  <br />
+                  연간 부담까지 빠르게 확인하세요.
                 </p>
               </div>
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-3xl" style={{backgroundColor: theme.primary}}>
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] text-4xl" style={{backgroundColor: theme.primary}}>
                 💸
               </div>
             </div>
@@ -285,17 +277,17 @@ export default function App() {
         </header>
 
         <main className="flex-1 overflow-y-auto px-5 pb-28 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <section className="mb-5 rounded-[32px] p-5" style={{backgroundColor: theme.surfaceContainer}}>
-            <div className="mb-5 flex items-start justify-between gap-4">
+          <section className="mb-8">
+            <div>
               <div className="flex-1">
-                <span className="text-sm font-medium" style={{color: theme.onSurfaceVariant}}>
+                <span className="text-[20px] font-bold" style={{color: theme.onSurface}}>
                   이번 달 총 사글세
                 </span>
                 <motion.div
                   key={totalCost}
                   initial={{scale: 0.96, opacity: 0.6}}
                   animate={{scale: 1, opacity: 1}}
-                  className="mt-2 text-[30px] font-black tracking-tight sm:text-[34px]"
+                  className="mt-0.5 text-[30px] font-black tracking-tight sm:text-[34px]"
                   style={{color: theme.onSurface}}
                 >
                   {formatCurrency(totalCost)}
@@ -304,39 +296,6 @@ export default function App() {
                   1년이면 {formatCurrency(yearlyCost)} 정도 나가요.
                 </p>
               </div>
-
-              <div className="rounded-[24px] px-4 py-3 text-right" style={{backgroundColor: theme.surfaceSubtle}}>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{color: theme.onSurfaceVariant}}>
-                  active
-                </p>
-                <p className="mt-1 text-3xl font-black" style={{color: theme.onSurface}}>
-                  {subscriptions.length}
-                </p>
-                <p className="text-xs" style={{color: theme.onSurfaceVariant}}>
-                  subscriptions
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {categoryOptions.map((item) => (
-                <div key={item} className="rounded-[22px] px-4 py-3" style={{backgroundColor: theme.surfaceSubtle}}>
-                  <div className="mb-1 flex items-center gap-2">
-                    <span
-                      className="inline-flex min-w-10 items-center justify-center rounded-full px-2 py-1 text-[10px] font-black tracking-[0.12em]"
-                      style={{backgroundColor: categoryMeta[item].bg, color: categoryMeta[item].color}}
-                    >
-                      {categoryMeta[item].emoji}
-                    </span>
-                    <span className="text-sm font-semibold" style={{color: theme.onSurface}}>
-                      {item}
-                    </span>
-                  </div>
-                  <span className="text-xs" style={{color: theme.onSurfaceVariant}}>
-                    {categorySummary[item]}개 관리 중
-                  </span>
-                </div>
-              ))}
             </div>
           </section>
 
@@ -344,7 +303,7 @@ export default function App() {
             <div className="mb-3 px-1">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-[18px] font-bold" style={{color: theme.onSurface}}>
+                  <h2 className="text-[20px] font-bold" style={{color: theme.onSurface}}>
                     사글세 목록
                   </h2>
                   <p className="mt-1 text-xs" style={{color: theme.onSurfaceVariant}}>
@@ -369,25 +328,6 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {filterOptions.map((option) => {
-                  const isActive = activeFilter === option;
-                  const meta = option === '전체' ? null : categoryMeta[option];
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => setActiveFilter(option)}
-                      className="shrink-0 rounded-full px-4 py-2 text-sm font-bold transition-transform active:scale-[0.98]"
-                      style={{
-                        backgroundColor: isActive ? theme.primary : meta ? meta.bg : theme.surfaceContainerHigh,
-                        color: isActive ? theme.onPrimary : meta ? meta.color : theme.onSurface,
-                      }}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -448,7 +388,7 @@ export default function App() {
                                   <img
                                     src={logoUrl}
                                     alt={sub.name}
-                                    className="h-full w-full object-cover"
+                                    className="h-full w-full rounded-2xl object-contain p-2"
                                     referrerPolicy="no-referrer"
                                   />
                                 ) : (
@@ -462,59 +402,40 @@ export default function App() {
                                     {sub.name}
                                   </h3>
                                   <span
-                                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
                                     style={{backgroundColor: meta.bg, color: meta.color}}
                                   >
-                                    <Tag size={12} />
                                     {sub.category}
                                   </span>
                                 </div>
-                                <p className="mt-1 text-xs" style={{color: theme.onSurfaceVariant}}>
-                                  {sub.category} · {formatBillingDay(sub.billingDay)} · 브라우저에 자동 저장됨
-                                </p>
                               </div>
                             </div>
 
                             <div className="shrink-0 text-right">
-                              <p className="text-[18px] font-black" style={{color: theme.onSurface}}>
+                              <p className="text-[20px] font-black" style={{color: theme.onSurface}}>
                                 {formatCurrency(sub.price)}
                               </p>
-                              <p className="text-xs" style={{color: theme.onSurfaceVariant}}>
+                              <p className="text-[16px]" style={{color: theme.onSurfaceVariant}}>
                                 연 {formatCurrency(sub.price * 12)}
                               </p>
                             </div>
                           </div>
 
-                          <div className="mt-4 flex items-center justify-between gap-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <div className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold" style={{backgroundColor: theme.surfaceSubtle, color: theme.onSurfaceSoft}}>
-                                <WalletCards size={14} />
-                                매달 빠져나가는 비용
-                              </div>
-                              <div className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold" style={{backgroundColor: theme.surfaceSubtle, color: theme.onSurfaceSoft}}>
-                                <CalendarDays size={14} />
-                                {formatBillingDay(sub.billingDay)}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
+                          <div className="mt-4 flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openEditSheet(sub)}
-                                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold"
-                                style={{backgroundColor: theme.surfaceContainerHigh, color: theme.onSurface}}
+                                className="inline-flex items-center rounded-xl px-4 py-3 text-sm font-medium"
+                                style={{backgroundColor: '#F5F7EE', color: theme.onSurface}}
                               >
-                                <Pencil size={14} />
                                 수정
                               </button>
                               <button
                                 onClick={() => handleRemove(sub.id)}
-                                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold"
-                                style={{backgroundColor: theme.dangerSoft, color: theme.danger}}
+                                className="inline-flex items-center rounded-xl px-4 py-3 text-sm font-medium"
+                                style={{backgroundColor: '#FFF1ED', color: '#D86041'}}
                               >
-                                <Trash2 size={14} />
                                 삭제
                               </button>
-                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -529,7 +450,7 @@ export default function App() {
         <button
           onClick={openCreateSheet}
           className="absolute bottom-7 right-6 z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
-          style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)'}}
+          style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)', bottom: '20px', right: '20px'}}
           aria-label="구독 추가"
         >
           <Plus size={28} />
@@ -677,7 +598,6 @@ export default function App() {
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-[22px] py-4 text-base font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
                     style={{backgroundColor: theme.primary, color: theme.onPrimary}}
                   >
-                    {isEditing ? <Pencil size={18} /> : <Plus size={18} />}
                     {isEditing ? '수정하기' : '추가하기'}
                   </button>
                 </form>
