@@ -1,15 +1,17 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {Pencil, Plus, Sparkles, Tag, Trash2, WalletCards, X} from 'lucide-react';
+import {CalendarDays, Pencil, Plus, Sparkles, Tag, Trash2, WalletCards, X} from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 
 type Category = '영상' | '음악' | 'AI' | '쇼핑' | '기타';
 type SortOption = 'price-desc' | 'price-asc' | 'name-asc';
+type FilterOption = '전체' | Category;
 
 interface Subscription {
   id: string;
   name: string;
   price: number;
   category: Category;
+  billingDay: number;
 }
 
 const STORAGE_KEY = 'digital-rent-subscriptions';
@@ -34,6 +36,7 @@ const theme = {
 };
 
 const categoryOptions: Category[] = ['영상', '음악', 'AI', '쇼핑', '기타'];
+const filterOptions: FilterOption[] = ['전체', ...categoryOptions];
 
 const categoryMeta: Record<Category, {emoji: string; bg: string; color: string}> = {
   영상: {emoji: 'TV', bg: '#E8F1FF', color: '#244C8F'},
@@ -44,11 +47,11 @@ const categoryMeta: Record<Category, {emoji: string; bg: string; color: string}>
 };
 
 const defaultSubscriptions: Subscription[] = [
-  {id: '1', name: '넷플릭스', price: 17000, category: '영상'},
-  {id: '2', name: '유튜브 프리미엄', price: 14900, category: '영상'},
-  {id: '3', name: '스포티파이', price: 10900, category: '음악'},
-  {id: '4', name: '제미나이', price: 29000, category: 'AI'},
-  {id: '5', name: '클로드', price: 29000, category: 'AI'},
+  {id: '1', name: '넷플릭스', price: 17000, category: '영상', billingDay: 7},
+  {id: '2', name: '유튜브 프리미엄', price: 14900, category: '영상', billingDay: 15},
+  {id: '3', name: '스포티파이', price: 10900, category: '음악', billingDay: 4},
+  {id: '4', name: '제미나이', price: 29000, category: 'AI', billingDay: 1},
+  {id: '5', name: '클로드', price: 29000, category: 'AI', billingDay: 18},
 ];
 
 function getLogoUrl(name: string) {
@@ -71,6 +74,13 @@ function isValidCategory(category: unknown): category is Category {
   return typeof category === 'string' && categoryOptions.includes(category as Category);
 }
 
+function normalizeBillingDay(value: unknown) {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 31) {
+    return value;
+  }
+  return 1;
+}
+
 function loadSubscriptions() {
   if (typeof window === 'undefined') {
     return defaultSubscriptions;
@@ -91,13 +101,12 @@ function loadSubscriptions() {
         if (typeof candidate.name !== 'string' || !candidate.name.trim()) return null;
         if (typeof candidate.price !== 'number' || Number.isNaN(candidate.price) || candidate.price < 0) return null;
 
-        const category = isValidCategory(candidate.category) ? candidate.category : '기타';
-
         return {
           id: candidate.id,
           name: candidate.name.trim(),
           price: candidate.price,
-          category,
+          category: isValidCategory(candidate.category) ? candidate.category : '기타',
+          billingDay: normalizeBillingDay(candidate.billingDay),
         } satisfies Subscription;
       })
       .filter((item): item is Subscription => item !== null);
@@ -112,6 +121,10 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('ko-KR', {style: 'currency', currency: 'KRW', maximumFractionDigits: 0}).format(value);
 }
 
+function formatBillingDay(value: number) {
+  return `매월 ${value}일 결제`;
+}
+
 export default function App() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => loadSubscriptions());
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -119,7 +132,9 @@ export default function App() {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<Category>('영상');
+  const [billingDay, setBillingDay] = useState('1');
   const [sortBy, setSortBy] = useState<SortOption>('price-desc');
+  const [activeFilter, setActiveFilter] = useState<FilterOption>('전체');
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(subscriptions));
@@ -141,13 +156,18 @@ export default function App() {
     );
   }, [subscriptions]);
 
+  const filteredSubscriptions = useMemo(() => {
+    if (activeFilter === '전체') return subscriptions;
+    return subscriptions.filter((sub) => sub.category === activeFilter);
+  }, [activeFilter, subscriptions]);
+
   const sortedSubscriptions = useMemo(() => {
-    return [...subscriptions].sort((a, b) => {
+    return [...filteredSubscriptions].sort((a, b) => {
       if (sortBy === 'price-desc') return b.price - a.price;
       if (sortBy === 'price-asc') return a.price - b.price;
       return a.name.localeCompare(b.name, 'ko-KR');
     });
-  }, [subscriptions, sortBy]);
+  }, [filteredSubscriptions, sortBy]);
 
   const isEditing = editingId !== null;
 
@@ -155,6 +175,7 @@ export default function App() {
     setName('');
     setPrice('');
     setCategory('영상');
+    setBillingDay('1');
     setEditingId(null);
   };
 
@@ -168,6 +189,7 @@ export default function App() {
     setName(subscription.name);
     setPrice(String(subscription.price));
     setCategory(subscription.category);
+    setBillingDay(String(subscription.billingDay));
     setIsSheetOpen(true);
   };
 
@@ -180,8 +202,10 @@ export default function App() {
     e.preventDefault();
     const trimmedName = name.trim();
     const numericPrice = Number(price);
+    const numericBillingDay = Number(billingDay);
 
     if (!trimmedName || !price || Number.isNaN(numericPrice) || numericPrice < 0) return;
+    if (!billingDay || !Number.isInteger(numericBillingDay) || numericBillingDay < 1 || numericBillingDay > 31) return;
 
     if (isEditing) {
       setSubscriptions((current) =>
@@ -192,6 +216,7 @@ export default function App() {
                 name: trimmedName,
                 price: numericPrice,
                 category,
+                billingDay: numericBillingDay,
               }
             : sub,
         ),
@@ -204,6 +229,7 @@ export default function App() {
           name: trimmedName,
           price: numericPrice,
           category,
+          billingDay: numericBillingDay,
         },
       ]);
     }
@@ -214,6 +240,8 @@ export default function App() {
   const handleRemove = (id: string) => {
     setSubscriptions((current) => current.filter((sub) => sub.id !== id));
   };
+
+  const selectedCount = sortedSubscriptions.length;
 
   return (
     <div
@@ -246,7 +274,7 @@ export default function App() {
                   디지털 사글세
                 </h1>
                 <p className="mt-2 text-sm leading-6" style={{color: theme.onSurfaceSoft}}>
-                  매달 빠져나가는 구독료를 한 화면에서 정리하고, 연간 부담까지 한 번에 체크하세요.
+                  구독료, 결제일, 카테고리를 한 화면에서 관리하고 연간 부담까지 빠르게 확인하세요.
                 </p>
               </div>
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-3xl" style={{backgroundColor: theme.primary}}>
@@ -313,30 +341,52 @@ export default function App() {
           </section>
 
           <section>
-            <div className="mb-4 flex items-center justify-between px-1">
-              <div>
-                <h2 className="text-[18px] font-bold" style={{color: theme.onSurface}}>
-                  사글세 목록
-                </h2>
-                <p className="mt-1 text-xs" style={{color: theme.onSurfaceVariant}}>
-                  이름, 카테고리, 월 요금을 수정하고 정리할 수 있어요.
-                </p>
+            <div className="mb-3 px-1">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-[18px] font-bold" style={{color: theme.onSurface}}>
+                    사글세 목록
+                  </h2>
+                  <p className="mt-1 text-xs" style={{color: theme.onSurfaceVariant}}>
+                    {activeFilter === '전체' ? `전체 ${selectedCount}개 구독` : `${activeFilter} 카테고리 ${selectedCount}개 구독`}
+                  </p>
+                </div>
+
+                <div className="relative flex items-center">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="appearance-none rounded-full px-4 py-2 pr-9 text-sm font-semibold outline-none"
+                    style={{backgroundColor: theme.surfaceContainerHigh, color: theme.onSurface}}
+                  >
+                    <option value="price-desc">가격 높은순</option>
+                    <option value="price-asc">가격 낮은순</option>
+                    <option value="name-asc">가나다순</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{color: theme.onSurfaceVariant}}>
+                    ▼
+                  </div>
+                </div>
               </div>
 
-              <div className="relative flex items-center">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="appearance-none rounded-full px-4 py-2 pr-9 text-sm font-semibold outline-none"
-                  style={{backgroundColor: theme.surfaceContainerHigh, color: theme.onSurface}}
-                >
-                  <option value="price-desc">가격 높은순</option>
-                  <option value="price-asc">가격 낮은순</option>
-                  <option value="name-asc">가나다순</option>
-                </select>
-                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{color: theme.onSurfaceVariant}}>
-                  ▼
-                </div>
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {filterOptions.map((option) => {
+                  const isActive = activeFilter === option;
+                  const meta = option === '전체' ? null : categoryMeta[option];
+                  return (
+                    <button
+                      key={option}
+                      onClick={() => setActiveFilter(option)}
+                      className="shrink-0 rounded-full px-4 py-2 text-sm font-bold transition-transform active:scale-[0.98]"
+                      style={{
+                        backgroundColor: isActive ? theme.primary : meta ? meta.bg : theme.surfaceContainerHigh,
+                        color: isActive ? theme.onPrimary : meta ? meta.color : theme.onSurface,
+                      }}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -351,13 +401,15 @@ export default function App() {
                     style={{backgroundColor: theme.surfaceContainer, border: `1px dashed ${theme.surfaceContainerHighest}`}}
                   >
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-3xl" style={{backgroundColor: theme.primaryContainer}}>
-                      🧾
+                      🗂️
                     </div>
                     <h3 className="text-lg font-bold" style={{color: theme.onSurface}}>
-                      아직 등록된 사글세가 없어요
+                      {activeFilter === '전체' ? '아직 등록된 사글세가 없어요' : `${activeFilter} 카테고리에 등록된 구독이 없어요`}
                     </h3>
                     <p className="mx-auto mt-2 max-w-[240px] text-sm leading-6" style={{color: theme.onSurfaceVariant}}>
-                      첫 구독을 추가하면 이 브라우저에 자동으로 저장되고, 월간과 연간 총액도 바로 계산됩니다.
+                      {activeFilter === '전체'
+                        ? '첫 구독을 추가하면 이 브라우저에 자동으로 저장되고, 월간과 연간 총액도 바로 계산됩니다.'
+                        : '다른 카테고리를 보거나 새 구독을 추가해서 목록을 채워보세요.'}
                     </p>
                     <button
                       onClick={openCreateSheet}
@@ -365,7 +417,7 @@ export default function App() {
                       style={{backgroundColor: theme.primary, color: theme.onPrimary}}
                     >
                       <Plus size={16} />
-                      첫 구독 추가하기
+                      새 구독 추가하기
                     </button>
                   </motion.div>
                 ) : (
@@ -418,7 +470,7 @@ export default function App() {
                                   </span>
                                 </div>
                                 <p className="mt-1 text-xs" style={{color: theme.onSurfaceVariant}}>
-                                  {sub.category} 카테고리 구독 · 브라우저에 자동 저장됨
+                                  {sub.category} · {formatBillingDay(sub.billingDay)} · 브라우저에 자동 저장됨
                                 </p>
                               </div>
                             </div>
@@ -434,9 +486,15 @@ export default function App() {
                           </div>
 
                           <div className="mt-4 flex items-center justify-between gap-3">
-                            <div className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold" style={{backgroundColor: theme.surfaceSubtle, color: theme.onSurfaceSoft}}>
-                              <WalletCards size={14} />
-                              매달 빠져나가는 비용
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold" style={{backgroundColor: theme.surfaceSubtle, color: theme.onSurfaceSoft}}>
+                                <WalletCards size={14} />
+                                매달 빠져나가는 비용
+                              </div>
+                              <div className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold" style={{backgroundColor: theme.surfaceSubtle, color: theme.onSurfaceSoft}}>
+                                <CalendarDays size={14} />
+                                {formatBillingDay(sub.billingDay)}
+                              </div>
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -502,7 +560,7 @@ export default function App() {
                       {isEditing ? '구독 수정' : '새 구독 추가'}
                     </h3>
                     <p className="mt-1 text-sm" style={{color: theme.onSurfaceVariant}}>
-                      이름, 월 요금, 카테고리를 입력하면 바로 반영돼요.
+                      이름, 월 요금, 카테고리, 결제일을 입력하면 바로 반영돼요.
                     </p>
                   </div>
                   <button
@@ -535,25 +593,49 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="price" className="px-1 text-sm font-medium" style={{color: theme.onSurfaceVariant}}>
-                      월 요금
-                    </label>
-                    <input
-                      id="price"
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      placeholder="예: 17000"
-                      className="rounded-2xl px-4 py-4 text-base outline-none"
-                      style={{
-                        backgroundColor: theme.surface,
-                        color: theme.onSurface,
-                        border: `1px solid ${theme.surfaceContainerHighest}`,
-                      }}
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="price" className="px-1 text-sm font-medium" style={{color: theme.onSurfaceVariant}}>
+                        월 요금
+                      </label>
+                      <input
+                        id="price"
+                        type="number"
+                        min="0"
+                        inputMode="numeric"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="17000"
+                        className="rounded-2xl px-4 py-4 text-base outline-none"
+                        style={{
+                          backgroundColor: theme.surface,
+                          color: theme.onSurface,
+                          border: `1px solid ${theme.surfaceContainerHighest}`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="billingDay" className="px-1 text-sm font-medium" style={{color: theme.onSurfaceVariant}}>
+                        매월 결제일
+                      </label>
+                      <input
+                        id="billingDay"
+                        type="number"
+                        min="1"
+                        max="31"
+                        inputMode="numeric"
+                        value={billingDay}
+                        onChange={(e) => setBillingDay(e.target.value)}
+                        placeholder="1"
+                        className="rounded-2xl px-4 py-4 text-base outline-none"
+                        style={{
+                          backgroundColor: theme.surface,
+                          color: theme.onSurface,
+                          border: `1px solid ${theme.surfaceContainerHighest}`,
+                        }}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -585,7 +667,13 @@ export default function App() {
 
                   <button
                     type="submit"
-                    disabled={!name.trim() || !price}
+                    disabled={
+                      !name.trim() ||
+                      !price ||
+                      !billingDay ||
+                      Number(billingDay) < 1 ||
+                      Number(billingDay) > 31
+                    }
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-[22px] py-4 text-base font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
                     style={{backgroundColor: theme.primary, color: theme.onPrimary}}
                   >
