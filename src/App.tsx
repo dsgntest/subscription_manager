@@ -276,7 +276,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-5 pb-28 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <main className="flex-1 overflow-y-auto px-5 pb-[42px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <section className="mb-8">
             <div>
               <div className="flex-1">
@@ -401,12 +401,6 @@ export default function App() {
                                   <h3 className="truncate text-[16px] font-bold" style={{color: theme.onSurface}}>
                                     {sub.name}
                                   </h3>
-                                  <span
-                                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
-                                    style={{backgroundColor: meta.bg, color: meta.color}}
-                                  >
-                                    {sub.category}
-                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -424,14 +418,14 @@ export default function App() {
                           <div className="mt-4 flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openEditSheet(sub)}
-                                className="inline-flex items-center rounded-xl px-4 py-3 text-sm font-medium"
+                                className="inline-flex items-center rounded-xl px-2 py-2 text-[13px] font-medium"
                                 style={{backgroundColor: '#F5F7EE', color: theme.onSurface}}
                               >
                                 수정
                               </button>
                               <button
                                 onClick={() => handleRemove(sub.id)}
-                                className="inline-flex items-center rounded-xl px-4 py-3 text-sm font-medium"
+                                className="inline-flex items-center rounded-xl px-2 py-2 text-[13px] font-medium"
                                 style={{backgroundColor: '#FFF1ED', color: '#D86041'}}
                               >
                                 삭제
@@ -450,7 +444,7 @@ export default function App() {
         <button
           onClick={openCreateSheet}
           className="absolute bottom-7 right-6 z-20 flex h-[64px] w-[64px] items-center justify-center rounded-[22px] transition-transform hover:scale-105 active:scale-95"
-          style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)', bottom: '20px', right: '20px'}}
+          style={{backgroundColor: theme.primary, color: theme.onPrimary, boxShadow: '0 16px 32px rgba(204,255,0,0.28)', bottom: '42px', right: '20px'}}
           aria-label="구독 추가"
         >
           <Plus size={28} />
